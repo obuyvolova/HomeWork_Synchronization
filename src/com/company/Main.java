@@ -7,8 +7,8 @@ import java.util.Random;
 public class Main {
 
     public static final Map<Integer, Integer> sizeToFreq = new HashMap<>();
+    public static int maxKey = 0;
     public static int maxValue = 0;
-    public static int maxCount = 0;
     public static final int ROUTES = 1000;
 
     public static void main(String[] args) {
@@ -26,9 +26,9 @@ public class Main {
                 synchronized (sizeToFreq) {
                     if (sizeToFreq.containsKey(count)) {
                         sizeToFreq.replace(count, sizeToFreq.get(count) + 1);
-                        if (sizeToFreq.get(count) > maxCount) {
-                            maxCount = sizeToFreq.get(count);
-                            maxValue = count + 1;
+                        if (sizeToFreq.get(count) > maxValue) {
+                            maxValue = sizeToFreq.get(count);
+                            maxKey = count;
                         }
                     } else {
                         sizeToFreq.put(count, 1);
@@ -37,9 +37,11 @@ public class Main {
             }).start();
         }
 
-        System.out.println("Maximum R is " + maxValue + ", " + maxCount + " times");
-        System.out.println("Other:");
-        sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
+        synchronized (sizeToFreq) {
+            System.out.println("Maximum R is " + maxKey + ", " + maxValue + " times");
+            System.out.println("Other:");
+            sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
+        }
     }
 
     public static String generateRoute(String letters, int length) {

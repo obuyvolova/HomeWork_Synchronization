@@ -3,7 +3,6 @@ package com.company;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.*;
 
 public class Main {
 
@@ -12,35 +11,31 @@ public class Main {
     public static int maxCount = 0;
     public static final int ROUTES = 1000;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) {
 
-        ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
         for (int i = 0; i < ROUTES; i++) {
-            final Callable task = () -> {
-                String str = generateRoute("RLRFR", 100);
-                int count = 0;
-                for (int j = 0; j < str.length(); j++) {
-                    if ('R' == str.charAt(j)) {
-                        count++;
+            new Thread(() -> {
+                String str1 = generateRoute("RLRFR", 100);
+                int count1 = 0;
+                for (int j = 0; j < str1.length(); j++) {
+                    if ('R' == str1.charAt(j)) {
+                        count1++;
                     }
                 }
-                return count;
-            };
-            Integer value = (Integer) pool.submit(task).get();
-
-            synchronized (sizeToFreq) {
-                if (sizeToFreq.containsKey(value)) {
-                    sizeToFreq.replace(value, sizeToFreq.get(value) + 1);
-                    if (sizeToFreq.get(value) > maxCount) {
-                        maxCount = sizeToFreq.get(value);
-                        maxValue = value;
+                synchronized (sizeToFreq) {
+                    if (sizeToFreq.containsKey(count1)) {
+                        sizeToFreq.replace(count1, sizeToFreq.get(count1) + 1);
+                        if (sizeToFreq.get(count1) > maxCount) {
+                            maxCount = sizeToFreq.get(count1);
+                            maxValue = count1 + 1;
+                        }
+                    } else {
+                        sizeToFreq.put(count1, 1);
                     }
-                } else {
-                    sizeToFreq.put(value, 1);
                 }
-            }
+            }).start();
         }
-        pool.shutdown();
 
         System.out.println("Maximum R is " + maxValue + ", " + maxCount + " times");
         System.out.println("Other:");

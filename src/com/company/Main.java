@@ -16,22 +16,22 @@ public class Main {
 
         for (int i = 0; i < ROUTES; i++) {
             new Thread(() -> {
-                String str1 = generateRoute("RLRFR", 100);
-                int count1 = 0;
-                for (int j = 0; j < str1.length(); j++) {
-                    if ('R' == str1.charAt(j)) {
-                        count1++;
+                String str = generateRoute("RLRFR", 100);
+                int count = 0;
+                for (int j = 0; j < str.length(); j++) {
+                    if ('R' == str.charAt(j)) {
+                        count++;
                     }
                 }
                 synchronized (sizeToFreq) {
-                    if (sizeToFreq.containsKey(count1)) {
-                        sizeToFreq.replace(count1, sizeToFreq.get(count1) + 1);
-                        if (sizeToFreq.get(count1) > maxCount) {
-                            maxCount = sizeToFreq.get(count1);
-                            maxValue = count1 + 1;
+                    if (sizeToFreq.containsKey(count)) {
+                        sizeToFreq.replace(count, sizeToFreq.get(count) + 1);
+                        if (sizeToFreq.get(count) > maxCount) {
+                            maxCount = sizeToFreq.get(count);
+                            maxValue = count + 1;
                         }
                     } else {
-                        sizeToFreq.put(count1, 1);
+                        sizeToFreq.put(count, 1);
                     }
                 }
             }).start();

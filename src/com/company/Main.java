@@ -11,8 +11,7 @@ public class Main {
     public static int maxValue = 0;
     public static final int ROUTES = 1000;
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws InterruptedException {
 
         for (int i = 0; i < ROUTES; i++) {
             new Thread(() -> {
@@ -37,11 +36,11 @@ public class Main {
             }).start();
         }
 
-        synchronized (sizeToFreq) {
+        Thread.sleep(2000);
+
             System.out.println("Maximum R is " + maxKey + ", " + maxValue + " times");
             System.out.println("Other:");
             sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
-        }
     }
 
     public static String generateRoute(String letters, int length) {

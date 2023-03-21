@@ -38,9 +38,9 @@ public class Main {
 
         Thread.sleep(2000);
 
-            System.out.println("Maximum R is " + maxKey + ", " + maxValue + " times");
-            System.out.println("Other:");
-            sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
+        System.out.println("Maximum R is " + maxKey + ", " + maxValue + " times");
+        System.out.println("Other:");
+        sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
     }
 
     public static String generateRoute(String letters, int length) {

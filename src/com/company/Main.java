@@ -3,20 +3,43 @@ package com.company;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.*;
 
 public class Main {
 
     public static final Map<Integer, Integer> sizeToFreq = new HashMap<>();
+    public static int maxKey = 0;
     public static int maxValue = 0;
-    public static int maxCount = 0;
     public static final int ROUTES = 1000;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
 
-        ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        Runnable taskMax = () -> {
+            int count = 1;
+            while (!Thread.interrupted()) {
+                if (count == ROUTES + 1) {
+                    break;
+                }
+                synchronized (sizeToFreq) {
+                    try {
+                        sizeToFreq.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    for (int key : sizeToFreq.keySet()) {
+                        if (maxValue < sizeToFreq.get(key)) {
+                            maxValue = sizeToFreq.get(key);
+                            maxKey = key;
+                        }
+                    }
+                        System.out.println(count++ + ". Leader is : " + maxKey + " Max Value: " + maxValue);
+                }
+            }
+        };
+        Thread threadMax = new Thread(taskMax);
+        threadMax.start();
+
         for (int i = 0; i < ROUTES; i++) {
-            final Callable task = () -> {
+            Runnable task = () -> {
                 String str = generateRoute("RLRFR", 100);
                 int count = 0;
                 for (int j = 0; j < str.length(); j++) {
@@ -24,25 +47,27 @@ public class Main {
                         count++;
                     }
                 }
-                return count;
-            };
-            Integer value = (Integer) pool.submit(task).get();
-
-            synchronized (sizeToFreq) {
-                if (sizeToFreq.containsKey(value)) {
-                    sizeToFreq.replace(value, sizeToFreq.get(value) + 1);
-                    if (sizeToFreq.get(value) > maxCount) {
-                        maxCount = sizeToFreq.get(value);
-                        maxValue = value;
+                synchronized (sizeToFreq) {
+                    if (sizeToFreq.containsKey(count)) {
+                        sizeToFreq.replace(count, sizeToFreq.get(count) + 1);
+                    } else {
+                        sizeToFreq.put(count, 1);
                     }
-                } else {
-                    sizeToFreq.put(value, 1);
+                    sizeToFreq.notify();
                 }
-            }
+            };
+            Thread thread = new Thread(task);
+            thread.start();
+            Thread.sleep(100);
+            System.out.println("This is " + thread.getName());
+            thread.interrupt();
         }
-        pool.shutdown();
 
-        System.out.println("Maximum R is " + maxValue + ", " + maxCount + " times");
+        threadMax.interrupt();
+
+        Thread.sleep(1000);
+
+        System.out.println("Maximum R is " + maxKey + ", " + maxValue + " times");
         System.out.println("Other:");
         sizeToFreq.forEach((key, value) -> System.out.println(key + "(" + value + " times)"));
     }
